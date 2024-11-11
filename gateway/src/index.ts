@@ -15,5 +15,6 @@ app.use('/api', gatewayRoutes);
 
 const PORT = process.env.GATEWAY_PORT || 3000;
 app.listen(PORT, () => {
+    console.log("###ENVS", process.env)
     console.log(`Gateway running on port ${PORT}`);
 });
