@@ -19,9 +19,16 @@ const sslOptions = {
 
 const server = https.createServer(sslOptions, app);
 
+const corsOptions = {
+    origin: process.env.UI_URL,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+};
+
 app.use(express.json());
 app.use(requestLogger);
-app.use(cors());
+app.use(cors(corsOptions));
 
 app.use('/order', OrderRouter);
 

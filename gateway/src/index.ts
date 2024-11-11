@@ -7,9 +7,17 @@ import { requestLogger } from './middleware/logger';
 dotenv.config();
 
 const app = express();
+
+const corsOptions = {
+    origin: process.env.UI_URL,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+};
+
 app.use(express.json());
-app.use(cors());
 app.use(requestLogger);
+app.use(cors(corsOptions));
 
 app.use('/api', gatewayRoutes);
 
