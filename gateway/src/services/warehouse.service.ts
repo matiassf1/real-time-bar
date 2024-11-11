@@ -4,7 +4,7 @@ export class WarehouseService {
     private baseURL: string;
 
     constructor() {
-        this.baseURL = process.env.STORE_URL || "http://localhost:3002";
+        this.baseURL = process.env.WAREHOUSE_URL || "http://localhost:3002";
     }
 
     async getIngredients(recipeIngredients: any) {

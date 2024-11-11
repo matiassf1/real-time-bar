@@ -16,8 +16,6 @@ router.post('/', async (_req: Request, res: Response) => {
         let orderCreated;
         try {
             orderCreated = await orderService.create(restDishRecipe);
-            res.json({ success: true, order: orderCreated });
-
         } catch (error) {
             console.error("Error creating order:", error);
             res.status(502).json({ success: false, message: "Failed to create order at Order Service" });
@@ -62,7 +60,7 @@ router.post('/', async (_req: Request, res: Response) => {
             res.status(502).json({ success: false, message: "Failed to complete order at Order Service" });
             return;
         }
-
+        res.json({ success: true });
     } catch (error) {
         console.error("Unexpected error processing order:", error);
         res.status(500).json({ success: false, message: "Unexpected error processing order" });
