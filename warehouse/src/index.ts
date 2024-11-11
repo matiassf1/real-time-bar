@@ -14,8 +14,8 @@ import { join } from 'path';
 
 const app = express();
 
-const privateKeyPath = join(__dirname, '../private-key.pem');
-const privateCertificatePath = join(__dirname, '../certificate.pem');
+const privateKeyPath = join(__dirname, './private-key.pem');
+const privateCertificatePath = join(__dirname, './certificate.pem');
 const sslOptions = {
     key: readFileSync(privateKeyPath),
     cert: readFileSync(privateCertificatePath),
