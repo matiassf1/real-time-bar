@@ -4,7 +4,7 @@ export class OrderService {
     private baseURL: string;
 
     constructor() {
-        this.baseURL = process.env.STORE_URL || "http://localhost:3003";
+        this.baseURL = process.env.ORDER_URL || "http://localhost:3003";
     }
 
     async create(dishRecipe: any) {
