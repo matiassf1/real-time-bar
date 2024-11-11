@@ -8,13 +8,17 @@ import { AppDataSource } from './config/data-source';
 import OrderRouter from './routes/order.routes';
 import { requestLogger } from './middleware/logger';
 import { globalSubscribers } from './messages/order.messages';
+import { join } from 'path';
 
 const app = express();
 const PORT = process.env.PORT || 3003;
 
+const privateKeyPath = join(__dirname, '../service-private-key.pem');
+const privateCertificatePath = join(__dirname, '../service-certificate.pem');
+
 const sslOptions = {
-    key: readFileSync('../service-private-key.pem'),
-    cert: readFileSync('../service-certificate.pem'),
+    key: readFileSync(privateKeyPath),
+    cert: readFileSync(privateCertificatePath),
 };
 
 const server = https.createServer(sslOptions, app);
