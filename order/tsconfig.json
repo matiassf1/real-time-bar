@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",                           // Set the JavaScript language version for output.
+    "module": "commonjs",                         // Specify the module code generation.
+    "rootDir": "./src",                           // Specify the root directory of input files.
+    "outDir": "./dist",                           // Redirect output structure to the `dist` folder.
+    "strict": true,                               // Enable all strict type-checking options.
+    "esModuleInterop": true,                      // Enables emit interoperability between CommonJS and ES Modules.
+    "skipLibCheck": true,                         // Skip type checking of declaration files.
+    "forceConsistentCasingInFileNames": true,    // Disallow inconsistently-cased references to the same file.
+    "moduleResolution": "node",                   // Specify module resolution strategy.
+    "resolveJsonModule": true,                    // Allow importing JSON files.
+    "isolatedModules": true,                       // Ensures that each file can be transpiled independently.
+    "incremental": true,                          // Enable incremental compilation.
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "baseUrl": "./src",
+    "paths": {
+      "*": ["node_modules/*", "*"]
+    }
+  },
+  "include": [
+    "src/**/*",                                    // Specify the files to be included in the compilation.
+    "**/*.ts"                                      // Temporarily include all TypeScript files in the project
+  ],
+  "exclude": [
+    "node_modules",                               // Exclude node_modules from the compilation.
+    "**/*.spec.ts",                               // Exclude test files from the compilation (if using Jest or similar).
+    "dist"                                        // Exclude output directory.
+  ]
+}
