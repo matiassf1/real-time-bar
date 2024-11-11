@@ -9,16 +9,13 @@ import { AppDataSource } from './config/data-source';
 import { requestLogger } from './middleware/logger';
 import { globalSubscribers } from './messages/stock.messages';
 import { readFileSync } from 'fs';
-import { join } from 'path';
 
 
 const app = express();
 
-const privateKeyPath = join(__dirname, './private-key.pem');
-const privateCertificatePath = join(__dirname, './certificate.pem');
 const sslOptions = {
-    key: readFileSync(privateKeyPath),
-    cert: readFileSync(privateCertificatePath),
+    key: readFileSync('./private-key.pem'),
+    cert: readFileSync('./certificate.pem'),
 };
 
 const server = https.createServer(sslOptions, app);
