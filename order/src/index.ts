@@ -1,6 +1,7 @@
 import express from 'express';
-import http from 'http';
+import https from 'https';
 import cors from 'cors';
+import { readFileSync } from 'fs';
 import { WebSocketServer } from 'ws';
 
 import { AppDataSource } from './config/data-source';
@@ -9,8 +10,14 @@ import { requestLogger } from './middleware/logger';
 import { globalSubscribers } from './messages/order.messages';
 
 const app = express();
-const server = http.createServer(app);
 const PORT = process.env.PORT || 3003;
+
+const sslOptions = {
+    key: readFileSync('../service-private-key.pem'),
+    cert: readFileSync('../service-certificate.pem'),
+};
+
+const server = https.createServer(sslOptions, app);
 
 app.use(express.json());
 app.use(requestLogger);

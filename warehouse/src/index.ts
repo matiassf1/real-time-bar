@@ -1,17 +1,24 @@
 import express from 'express';
-import http from 'http';
+import https from 'https';
 import cors from 'cors';
-import { WebSocketServer, WebSocket } from 'ws';
+import { WebSocketServer } from 'ws';
 
 import purchaseRouter from './routes/purchase.routes';
 import stockRouter from './routes/stock.routes';
 import { AppDataSource } from './config/data-source';
 import { requestLogger } from './middleware/logger';
 import { globalSubscribers } from './messages/stock.messages';
+import { readFileSync } from 'fs';
 
 
 const app = express();
-const server = http.createServer(app);
+
+const sslOptions = {
+    key: readFileSync('../private-key.pem'),
+    cert: readFileSync('../certificate.pem'),
+};
+
+const server = https.createServer(sslOptions, app);
 
 app.use(express.json());
 app.use(cors());
