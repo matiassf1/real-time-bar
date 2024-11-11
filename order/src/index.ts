@@ -22,7 +22,7 @@ const fetchSslFiles = async () => {
 };
 
 const app = express();
-const PORT = process.env.PORT || 3003;
+const PORT = Number(process.env.PORT) || 3003;
 
 const setupServer = async () => {
     try {
@@ -42,7 +42,7 @@ const setupServer = async () => {
 
         app.use('/order', OrderRouter);
 
-        server.listen(PORT, () => {
+        server.listen(PORT, "0.0.0.0", 0, () => {
             console.log(`Order service running on https://localhost:${PORT}`);
         });
 
