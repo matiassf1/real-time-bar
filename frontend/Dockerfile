@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # expose port 3000 to tell Docker that the container listens on the specified network ports at runtime
-EXPOSE 3004
+EXPOSE 3000
 
 # command to run the app
 CMD npm start

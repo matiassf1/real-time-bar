@@ -17,5 +17,5 @@ COPY --from=build /app/dist /app
 COPY package*.json ./
 RUN npm install --omit=dev
 
-EXPOSE 3003
+EXPOSE 3002
 CMD ["npx", "nodemon", "src/index.ts"]
