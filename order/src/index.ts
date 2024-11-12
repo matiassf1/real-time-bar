@@ -42,7 +42,7 @@ const setupServer = async () => {
 
         app.use('/order', OrderRouter);
 
-        server.listen(PORT, "0.0.0.0", 0, () => {
+        server.listen(PORT, () => {
             console.log(`Order service running on https://localhost:${PORT}`);
         });
 
