@@ -1,0 +1,155 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - gateway
+    networks:
+      - app-network
+    environment:
+      - REACT_APP_API_URL=http://localhost:3004
+      - REACT_APP_GATEWAY_URL=http://localhost:3004
+      - REACT_APP_KITCHEN_URL=http://localhost:3001
+      - REACT_APP_WAREHOUSE_URL=http://localhost:3002
+      - REACT_APP_ORDER_URL=http://localhost:3003
+      - REACT_APP_WS_ORDER_URL=ws://localhost:3003
+      - REACT_APP_WS_STOCK_URL=ws://localhost:3002
+
+  kitchen:
+    build:
+      context: ./kitchen
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    networks:
+      - app-network
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - KITCHEN_PORT=3001
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/kitchen
+      - DB_SYNCHRONIZE=true
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - KITCHEN_URL=http://localhost:3001
+      - WAREHOUSE_URL=http://localhost:3002
+      - ORDER_URL=http://localhost:3003
+
+  warehouse:
+    build:
+      context: ./warehouse
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    networks:
+      - app-network
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - PORT=3002
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/warehouse
+      - DB_SYNCHRONIZE=true
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - KITCHEN_URL=http://kitchen:3001
+      - ORDER_URL=http://order:3003
+      - PURCHASE_URL=http://warehouse:3002
+
+  order:
+    build:
+      context: ./order
+      dockerfile: Dockerfile
+    ports:
+      - "3003:3003"
+    networks:
+      - app-network
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - PORT=3003
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/order
+      - DB_SYNCHRONIZE=true
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - KITCHEN_URL=http://kitchen:3001
+      - WAREHOUSE_URL=http://warehouse:3002
+      - ORDER_URL=http://order:3003
+
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    ports:
+      - "3004:3004"
+    networks:
+      - app-network
+    depends_on:
+      - kitchen
+      - warehouse
+      - order
+    environment:
+      - GATEWAY_PORT=3004
+      - KITCHEN_URL=http://kitchen:3001
+      - WAREHOUSE_URL=http://warehouse:3002
+      - ORDER_URL=http://order:3003
+
+  db:
+    image: postgres:14
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -h localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    command: >
+      bash -c "
+        docker-entrypoint.sh postgres &
+        sleep 10 &&
+        psql -U postgres -c \"SELECT 1 FROM pg_database WHERE datname = 'kitchen'\" | grep -q 1 || psql -U postgres -c \"CREATE DATABASE kitchen;\" &&
+        psql -U postgres -c \"SELECT 1 FROM pg_database WHERE datname = 'warehouse'\" | grep -q 1 || psql -U postgres -c \"CREATE DATABASE warehouse;\" &&
+        psql -U postgres -c \"SELECT 1 FROM pg_database WHERE datname = 'order'\" | grep -q 1 || psql -U postgres -c \"CREATE DATABASE \\\"order\\\";\" &&
+        psql -U postgres -c \"SELECT 1 FROM pg_database WHERE datname = 'gateway'\" | grep -q 1 || psql -U postgres -c \"CREATE DATABASE gateway;\" &&
+        psql -U postgres -c \"GRANT ALL PRIVILEGES ON DATABASE kitchen TO postgres;\" &&
+        psql -U postgres -c \"GRANT ALL PRIVILEGES ON DATABASE warehouse TO postgres;\" &&
+        psql -U postgres -c \"GRANT ALL PRIVILEGES ON DATABASE \\\"order\\\" TO postgres;\" &&
+        psql -U postgres -c \"GRANT ALL PRIVILEGES ON DATABASE gateway TO postgres;\" &&
+        wait
+      "
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data: 

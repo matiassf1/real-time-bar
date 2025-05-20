@@ -30,7 +30,7 @@ export class RecipeService {
             .orderBy("RANDOM()")
             .limit(1)
             .getRawOne();
-
+        console.log("###RANDOMRECIPEID", randomRecipeId);
         if (!randomRecipeId) {
             throw new Error("No recipes found.");
         }

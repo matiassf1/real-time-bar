@@ -6,29 +6,27 @@ import recipeRoutes from './routes/recipe.routes';
 import { requestLogger } from './middleware/logger';
 import { AppDataSource } from './config/data-source';
 
-AppDataSource.initialize()
-    .then(() => {
-        console.log("Data Source has been initialized!");
-    })
-    .catch((error) => {
-        console.error("Error during Data Source initialization", error);
-    });
-
 const app = express();
-
-const corsOptions = {
-    origin: "*",
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-};
-
+app.use(cors());
 app.use(express.json());
 app.use(requestLogger);
-app.use(cors(corsOptions));
 
 app.use('/recipes', recipeRoutes);
 
 const PORT = process.env.KITCHEN_PORT || 3001;
-app.listen(PORT, () => {
-    console.log(`Kitchen running on port ${PORT}`);
-});
+
+async function startServer() {
+    try {
+        await AppDataSource.initialize();
+        console.log("Data Source has been initialized!");
+        
+        app.listen(PORT, () => {
+            console.log(`Kitchen service running on port ${PORT}`);
+        });
+    } catch (error) {
+        console.error("Error during Data Source initialization", error);
+        process.exit(1);
+    }
+}
+
+startServer();

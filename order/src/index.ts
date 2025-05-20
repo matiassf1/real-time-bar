@@ -1,5 +1,4 @@
 import express from 'express';
-import https from 'https';
 import cors from 'cors';
 import { WebSocketServer } from 'ws';
 import { AppDataSource } from './config/data-source';
@@ -7,29 +6,11 @@ import OrderRouter from './routes/order.routes';
 import { requestLogger } from './middleware/logger';
 import { globalSubscribers } from './messages/order.messages';
 
-const fetchSslFiles = async () => {
-    const privateKeyResponse = await fetch('https://wprvfcfwmkpjvvatrsbm.supabase.co/storage/v1/object/public/ssl/order/service-private-key.pem');
-    const certificateResponse = await fetch('https://wprvfcfwmkpjvvatrsbm.supabase.co/storage/v1/object/public/ssl/order/service-certificate.pem');
-
-    if (!privateKeyResponse.ok || !certificateResponse.ok) {
-        throw new Error('Failed to fetch SSL certificates');
-    }
-
-    const privateKey = await privateKeyResponse.text();
-    const certificate = await certificateResponse.text();
-
-    return { key: privateKey, cert: certificate };
-};
-
 const app = express();
 const PORT = Number(process.env.PORT) || 3003;
 
 const setupServer = async () => {
     try {
-        const sslOptions = await fetchSslFiles();
-
-        const server = https.createServer(sslOptions, app);
-
         const corsOptions = {
             origin: "*",
             methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -42,8 +23,8 @@ const setupServer = async () => {
 
         app.use('/order', OrderRouter);
 
-        server.listen(PORT, () => {
-            console.log(`Order service running on https://localhost:${PORT}`);
+        const server = app.listen(PORT, () => {
+            console.log(`Order service running on http://localhost:${PORT}`);
         });
 
         await AppDataSource.initialize();

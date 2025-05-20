@@ -12,6 +12,9 @@ export const AppDataSource = new DataSource({
         RecipeIngredient,
         Ingredient,
     ],
-    logging: false,
-    poolSize: 20
+    logging: true,
+    poolSize: 20,
+    migrations: [],
+    subscribers: [],
+    migrationsRun: false
 });

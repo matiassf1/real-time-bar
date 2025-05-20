@@ -18,4 +18,4 @@ COPY package*.json ./
 RUN npm install --omit=dev
 
 EXPOSE 3001
-CMD ["npx", "nodemon", "src/index.ts"]
+CMD ["node", "index.js"]

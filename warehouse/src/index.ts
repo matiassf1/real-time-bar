@@ -1,5 +1,4 @@
 import express from 'express';
-import https from 'https';
 import cors from 'cors';
 import { WebSocketServer } from 'ws';
 
@@ -11,30 +10,8 @@ import { globalSubscribers } from './messages/stock.messages';
 
 const app = express();
 
-const sslFiles = async () => {
-    const privateKeyResponse = await fetch('https://wprvfcfwmkpjvvatrsbm.supabase.co/storage/v1/object/public/ssl/warehouse/private-key.pem');
-    const certificateResponse = await fetch('https://wprvfcfwmkpjvvatrsbm.supabase.co/storage/v1/object/public/ssl/warehouse/certificate.pem');
-
-    // Ensure both responses are successful
-    if (!privateKeyResponse.ok || !certificateResponse.ok) {
-        throw new Error('Failed to fetch SSL certificates');
-    }
-
-    // Get the text content of the SSL files
-    const privateKey = await privateKeyResponse.text();
-    const certificate = await certificateResponse.text();
-
-    return { key: privateKey, cert: certificate };
-};
-
 const setupServer = async () => {
     try {
-        // Get SSL certificates
-        const sslOptions = await sslFiles();
-
-        // Create HTTPS server with the SSL certificates
-        const server = https.createServer(sslOptions, app);
-
         // CORS configuration
         const corsOptions = {
             origin: "*",
@@ -52,13 +29,13 @@ const setupServer = async () => {
 
         const PORT = process.env.PORT || 3002;
 
-        server.listen(PORT, () => {
-            console.log(`Server running on https://localhost:${PORT}`);
-        });
-
         // Initialize Data Source (DB)
         await AppDataSource.initialize();
         console.log("Data Source has been initialized!");
+
+        const server = app.listen(PORT, () => {
+            console.log(`Server running on http://localhost:${PORT}`);
+        });
 
         // WebSocket server setup
         const wss = new WebSocketServer({ server });
@@ -82,6 +59,7 @@ const setupServer = async () => {
         });
 
     } catch (error) {
+        console.log("###ERROR", error);
         console.error('Error setting up the server:', error);
     }
 };

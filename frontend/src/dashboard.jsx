@@ -32,8 +32,6 @@ export const Dashboard = () => {
         setError(null);
         try {
             const response = await axios.get(`${process.env.REACT_APP_WAREHOUSE_URL}/stock`);
-            console.log(response.data.stock);
-
             setIngredients(response.data.stock);
         } catch (err) {
             setError('Failed to load ingredients');
@@ -73,8 +71,6 @@ export const Dashboard = () => {
         setIngredients((prevIngredients) => {
             return prevIngredients.map((ingredient) => {
                 if (ingredient.id === updatedIngredient.id) {
-                    console.log(updatedIngredient, ingredient);
-                    
                     const isIncrease = updatedIngredient.quantity >= ingredient.quantity;
                     
                     return {
@@ -91,7 +87,7 @@ export const Dashboard = () => {
             setIngredients((prevIngredients) =>
                 prevIngredients.map((ingredient) => ({
                     ...ingredient,
-                    highlight: ingredient.highlight | null,
+                    highlight: null,
                 }))
             );
         }, 2000);
@@ -100,16 +96,26 @@ export const Dashboard = () => {
     const handleOrderRequest = async () => {
         try {
             const { data: { order } } = await axios.post(`${process.env.REACT_APP_GATEWAY_URL}/api`);
-
+            console.log('Sending order to WebSocket server', order);
             if (orderSocketRef.current && orderSocketRef.current.readyState === WebSocket.OPEN) {
+                console.log('Sending order to WebSocket server', order);
                 orderSocketRef.current.send(JSON.stringify({
-                    orderId: order.data.id,
+                    orderId: order?.data?.id,
                 }));
             } else {
                 console.log('WebSocket is not open.');
+                alert('No se pudo establecer la conexión en tiempo real. La orden se procesará en segundo plano.');
             }
         } catch (error) {
-            alert('Failed to place order.');
+            console.error('Error placing order:', error);
+            
+            if (error.code === 'ERR_NETWORK') {
+                alert('Error de conexión. Por favor, verifica tu conexión a internet.');
+            } else if (error.response) {
+                alert(`Error del servidor: ${error.response.data.message || 'Error al procesar la orden'}`);
+            } else {
+                alert('Error al procesar la orden. Por favor, intenta nuevamente.');
+            }
         }
     };
 
@@ -185,8 +191,8 @@ export const Dashboard = () => {
                     Place Order
                 </button>
             </div>
-            <WebSocketConnection connected={orderWsConnected} />
-            <WebSocketConnection connected={stockWsConnected} />
+            <WebSocketConnection connected={orderWsConnected} content="Receiving Orders" />
+            <WebSocketConnection connected={stockWsConnected} content="Receiving Stock" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <OrderStatus status="Receiving Orders" orders={orders} />
                 <OrderStatus status="Orders in Preparation" orders={orders} />

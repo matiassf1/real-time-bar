@@ -16,6 +16,8 @@ WORKDIR /app
 COPY --from=build /app/dist /app
 COPY package*.json ./
 RUN npm install --omit=dev
+COPY ./src/private-key.pem ./src/
+COPY ./src/certificate.pem ./src/
 
 EXPOSE 3002
 CMD ["npx", "nodemon", "src/index.ts"]

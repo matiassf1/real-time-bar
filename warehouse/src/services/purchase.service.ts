@@ -26,8 +26,17 @@ export class PurchaseService {
 
     public async purchaseIngredients(ingredientName: string): Promise<number> {
         try {
-            const response = await axios.get(`${process.env.PURCHASE_URL}/buy?ingredient=${ingredientName}`);
-            return response.data.quantitySold;
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            if (Math.random() < 0.3) {
+                console.log(`Market is out of stock for ${ingredientName}`);
+                return 0;
+            }
+
+            const quantity = Math.floor(Math.random() * 50) + 1;
+            console.log(`Market simulation for ${ingredientName}: ${quantity} units available`);
+
+            return quantity;
         } catch (error: any) {
             console.error(`Error purchasing ${ingredientName}: ${error?.message}`);
             return 0;
