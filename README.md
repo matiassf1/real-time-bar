@@ -36,7 +36,7 @@ git clone [URL_DEL_REPOSITORIO]
 cd real-time-bar
 ```
 
-2. Instalar dependencias:
+2. Instalar dependencias en los microservicios:
 ```bash
 npm install
 ```
@@ -48,18 +48,6 @@ docker-compose up -d
 
 ## 🔧 Configuración
 
-### Variables de Entorno
-
-Cada microservicio requiere su propio archivo `.env`. Los archivos de ejemplo se encuentran en cada directorio del servicio:
-
-- `gateway/.env.example`
-- `order/.env.example`
-- `kitchen/.env.example`
-- `warehouse/.env.example`
-- `market/.env.example`
-
-Copia cada archivo `.env.example` a `.env` y configura las variables según tu entorno.
-
 ### Puertos por Defecto
 
 - Gateway: 3000
@@ -70,15 +58,62 @@ Copia cada archivo `.env.example` a `.env` y configura las variables según tu e
 - RabbitMQ: 5672
 - MongoDB: 27017
 
-## 📚 Documentación de la API
+### Inicialización de la Base de Datos
 
-La documentación de la API está disponible en:
+El sistema viene con datos de ejemplo predefinidos que incluyen ingredientes y recetas. Para inicializar la base de datos con estos datos, ejecuta el siguiente script SQL:
 
-- Gateway: `http://localhost:3000/docs`
-- Order: `http://localhost:3001/docs`
-- Kitchen: `http://localhost:3002/docs`
-- Warehouse: `http://localhost:3003/docs`
-- Market: `http://localhost:3004/docs`
+```sql
+-- Primero, insertar ingredientes comunes
+INSERT INTO ingredients (name) VALUES
+    ('Salt'),
+    ('Black Pepper'),
+    ('Olive Oil'),
+    ('Garlic'),
+    ('Onion'),
+    ('Tomato'),
+    ('Chicken Breast'),
+    ('Rice'),
+    ('Pasta'),
+    ('Parmesan Cheese');
+
+-- Luego, insertar algunas recetas
+INSERT INTO recipes (name) VALUES
+    ('Simple Pasta with Tomato Sauce'),
+    ('Chicken Rice Bowl'),
+    ('Garlic Butter Chicken');
+
+-- Finalmente, insertar las relaciones receta-ingrediente con cantidades
+INSERT INTO recipes_ingredients ("recipeId", "ingredientId", quantity) VALUES
+    -- Pasta with Tomato Sauce
+    (1, 9, 500),    -- 500g of Pasta
+    (1, 6, 4),      -- 4 Tomatoes
+    (1, 5, 1),      -- 1 Onion
+    (1, 4, 2),      -- 2 Garlic cloves
+    (1, 3, 60),     -- 60ml Olive Oil
+    (1, 1, 10),     -- 10g Salt
+    (1, 2, 5),      -- 5g Black Pepper
+    (1, 10, 50),    -- 50g Parmesan Cheese
+
+    -- Chicken Rice Bowl
+    (2, 7, 300),    -- 300g Chicken Breast
+    (2, 8, 200),    -- 200g Rice
+    (2, 3, 30),     -- 30ml Olive Oil
+    (2, 4, 2),      -- 2 Garlic cloves
+    (2, 1, 8),      -- 8g Salt
+    (2, 2, 3),      -- 3g Black Pepper
+
+    -- Garlic Butter Chicken
+    (3, 7, 400),    -- 400g Chicken Breast
+    (3, 4, 4),      -- 4 Garlic cloves
+    (3, 3, 40),     -- 40ml Olive Oil
+    (3, 1, 8),      -- 8g Salt
+    (3, 2, 4);      -- 4g Black Pepper
+```
+
+Estos datos de ejemplo incluyen:
+- 10 ingredientes comunes
+- 3 recetas populares
+- Relaciones detalladas entre recetas e ingredientes con cantidades específicas
 
 ## 💻 Uso
 
@@ -115,16 +150,4 @@ npm test
 - El sistema utiliza WebSocket para proporcionar actualizaciones en tiempo real
 - Los pedidos tienen un tiempo de expiración de 5 minutos
 - El almacén tiene un umbral mínimo de ingredientes que activa la compra automática
-- La documentación de la API se genera automáticamente usando tsoa
 
-## 🤝 Contribución
-
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE.md](LICENSE.md) para más detalles.
